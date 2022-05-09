@@ -1,4 +1,4 @@
-\documentclass[a4paper,10pt]{report}
+\documentclass[a4paper]{book}
 
 \usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
 
@@ -20,16 +20,16 @@
 
 \usepackage{listings}
 
-\newtheorem{thm}{Théorème}[section]
-\newtheorem{defi}{Définition}[section]
-\newtheorem{prop}{Proposition}[section]
-\newtheorem{dfp}{Définition-Proposition}[section]
-\newtheorem{cor}{Corollaire}[section]
-\newtheorem{lem}{Lemme}[section]
-\newtheorem{rmq}{Remarque}[section]
-\newtheorem{conj}{Conjecture}[section]
-\newtheorem{ex}{Exemple(s)}[section]
-\newtheorem{ap}{Application(s)}[section]
+\newtheorem{thm}{Théorème}[chapter]
+\newtheorem{defi}{Définition}[chapter]
+\newtheorem{prop}{Proposition}[chapter]
+\newtheorem{dfp}{Définition-Proposition}[chapter]
+\newtheorem{cor}{Corollaire}[chapter]
+\newtheorem{lem}{Lemme}[chapter]
+\newtheorem{rmq}{Remarque}[chapter]
+\newtheorem{conj}{Conjecture}[chapter]
+\newtheorem{ex}{Exemple(s)}[chapter]
+\newtheorem{ap}{Application(s)}[chapter]
 
 \title{PiReVO}
 \author{}
@@ -37,6 +37,468 @@
 \begin{document}
 \maketitle
 \tableofcontents
+\part{Modèles de marché et évaluation des options européennes}
+\chapter{Introduction}
+\section{Modèle d'actif}
+On propose de voir l'évolution du prix d'un actif financier S au cours du temps comme la réalisation d'un processus aléatoire réel $S=(S_t)_{t\geq0}$ construit sur un espace probabilisé $(\Omega,\mathcal{F},\mathbb{P})$ muni d'une filtration\footnote{Famille croissante de sous-tribus de $\mathcal{F}$.} $(\mathcal{F}_t)_{t\geq0}$ adaptée au processus $S$, c'est à dire vérifiant
+\[\forall t\geq0,\ S_t \text{ est } \mathcal{F}_t-\text{mesurable} \]
+
+La donnée de cet espace filtré et du processus (ou éventuellement des processus)
+qui y évolue constitue la base sur laquelle sera construit un modèle de marché.
+On spécifiera de plus des "règles du jeu", choisies de sorte que ce que les
+interactions d'un opérateur avec le marché ne donne pas lieu à des aberrations
+économiques. Par exemple, il doit être impossible (ou au moins improbable) de
+dégager un profit sans investissement initial.
 
 
+\begin{ex}[Modèle binomial]
+    Soit $(\Omega,\mathcal{F},\mathbb{P})$ un espace probabilisé et soit $X=(X_n)_{n\geq 0}$ une suite de variables aléatoires définies sur $\Omega$, indépendantes et de même loi donnée par
+    \begin{equation}
+        \mathbb{P}(X_0=u)=p=1-\mathbb{P}(X_0=d),\ -1<d\leq u
+    \end{equation}
+    Soit ensuite $S_0\in\mathbb{R}_+^*$. On construit par récurrence la suite de variables aléatoires indépendantes $S=(S_n)_{0\leq n\leq N}$ à partir de $X$
+    \begin{equation}
+        S_{n+1}:=S_n (1+X_n),\ n\geq0
+    \end{equation}
+    et on munit $(\Omega,\mathcal{F},\mathbb{P})$ de la filtration naturelle\footnote{$\forall n\geq 0,\ \mathcal{F}_n$ est la plus petite tribu rendant mesurables les $S_0,...,S_n$} $(\mathcal{F}_n)_{n\geq 0}$ de $S$.
+
+    En clair, on modélise un actif dont le prix \emph{S} évolue en temps discret et est à chaque instant $n+1$ un pourcentage de ce qu'il fut à l'instant $n$.
+
+    On introduit par ailleurs le processus déterministe $B=(B_n)_{n\geq 0}$ défini par
+    \[B:\left\lbrace\begin{aligned}
+             & B_{n+1}:=(1+r)B_n \\
+             & B_0=1
+        \end{aligned}
+        \right. \]
+    où $r\in\mathbb{R}_+$. Cet actif correspond à un placement B qui rémunère au taux $r$ sur une période.
+\end{ex}
+Ce modèle va servir de fil conducteur à cette introduction. Il a avantage d'être simple d'un point de vue mathématique et fait apparaitre naturellement les idées qui s'appliqueront dans le cadre de modèles plus complexes. On trouve une présentation approfondie du formalisme des modèles à temps discret dans \cite{ICSAF}.
+
+
+\section{Portefeuilles, stratégies et arbitrage}
+Un ou plusieurs modèles d'actif étant posés, on souhaite rendre compte de la façon dont il sera possible de les constituer en \emph{portefeuille}. Un portefeuille ne désignera rien d'autre que l'ensemble des processus aléatoires $S^0,S^1,...,S^n$ représentant chacun des actifs possédés par un opérateur et sera représenté par un vecteur $\mathcal{P}=(S^0,S^1,...,S^n)$. On distinguera la composition du portefeuille et sa valeur. A cet effet on rangera les quantités détenues pour chaque actif dans un vecteur $\varphi = (s^0,s^1,...,s^n)$. La valeur $\mathcal{P}_\varphi$ du portefeuille est donc donnée par le processus aléatoire
+\begin{equation}
+    \mathcal{P}_\varphi = (\varphi,\mathcal{P}):=\sum_{k=0}^{n}s^kS^k
+\end{equation}
+Cette valeur évolue au cours du temps en fonction du cours des actifs constituant le portefeuille et de la part que chacun y représente.
+
+La quantité de chaque actif à chaque instant est le fait de l'opérateur et constitue ce que l'on appelle une \emph{stratégie} (d'investissement ou de diversification).
+
+La constitution d'une stratégie sera soumise à un certain nombre d'impératifs correspondant en quelques sortes aux règles du jeu du marché. Lorsque ce sera le cas, on parlera de stratégies admissibles. Par exemple on peut demander à une stratégie d'être \emph{auto-financée}, c'est à dire qu'au moment où l'opérateur décide de réorganiser son portefeuille, il doit le faire à valeur constante. Autrement dit, on interdit tout apport et tout retrait.
+
+Une propriété très importante que l'on attend généralement d'une stratégie admissible est qu'elle ne doit pas générer \emph{d'opportunité d'arbitrage}.
+
+\begin{ex}
+    Dans le cas du modèle binomial et si $r>u$ alors on peut constituer un portefeuille dont la valeur à l'instant 0 est nulle
+    \[\mathcal{P}^\varphi_0=-S_0+S_0 B_0=-S_0+S_0=0 \]
+    Cela revient à placer dans l'actif sans-risque B le fruit de la vente à découvert d'une part de l'actif $S$.
+
+    De cette manière on obtient que
+    \begin{align*}
+        \mathcal{P}^\varphi_1 & = -S_1+(1+r)S_0         \\
+                              & \geq -(1+u)S_0+(1+r)S_0 \\
+                              & \geq(r-u)S_0            \\
+                              & >0
+    \end{align*}
+    et on en déduit qu'il est possible ($\mathbb{P}$-ps) de dégager un profit à partir d'un investissement nul. C'est typiquement une situation d'arbitrage et il est donc nécessaire d'imposer que
+    \[r\leq u\]
+
+    On peut montrer qu'il est aussi nécessaire que l'on ait
+    \[r\geq d\]
+    en considérant la stratégie consistant à emprunter au taux $r$ de quoi acheter une part de l'actif $S$. En effet, si
+    \[\mathcal{P}^\varphi_0=S_0-S_0 B_0=0 \]
+    alors
+    \begin{align*}
+        \mathcal{P}^\varphi_1 & = S_1-(1+r)S_0         \\
+                              & \geq (1+d)S_0-(1+r)S_0 \\
+                              & \geq(d-r)S_0           \\
+                              & >0
+    \end{align*}
+    dans le cas où d<r, d'où le résultat.
+\end{ex}
+
+
+
+\section{Options européennes}
+Une option européenne est ce que l'on appelle un produit dérivé, c'est à dire un actif financier construit sur un autre, appelé le sous-jacent. On distingue deux cas particuliers d'options européennes : les options d'achat et de vente. Le détenteur d'une option d'achat C sur un sous-jacent S bénéficie du droit, et non de l'obligation, d'acheter le sous-jacent S à un prix K (prix d'exercice) et à une date T (date d'échéance ou maturité) fixés, quelque soit le cours de ce dernier à cette date.
+
+De façon symétrique, une option de vente P donne le droit à son détenteur de vendre le sous-jacent à un prix K et à une date T fixés.
+
+La valeur d'une option d'achat à échéance est alors donnée par
+\begin{equation}
+    C_T=\max(S_T-K,0)=:(S_t-K)_+
+\end{equation}
+De même pour une option de vente
+\begin{equation}
+    P_T=\max(K-S_T,0)=:(K-S_T)_+
+\end{equation}
+Dans les deux cas, le détenteur s'est offert le droit d'effectuer, ou pas, une certaine action à échéance et la \emph{personne} qui s'engage à ce qu'il puisse exercer ce droit est naturellement celle qui a vendu l'option.
+
+La question qui se pose naturellement est celle du juste prix d'un tel produit financier, au sens où ce prix doit être acceptable à la fois pour l'acheteur et le vendeur.
+\begin{ex}[Calcul du prix d'une option d'achat C dans le modèle binomial]
+
+    Considérons le cas où l'option arrive à échéance à l'instant $n=1$ et cherchons à déterminer le prix $C_0$ d'une option d'achat C pour un prix d'exercice $K$.
+
+    On considère le portefeuille
+    \[\Pi = sS+bB \]
+    De sorte que
+    \[\Pi_1=sS_1+(1+r)b \]
+    On peut alors choisir $b$ et $s$ de manière à ce que
+    \[\left\lbrace\begin{aligned}
+             & sS_u+(1+r)b=C_u \\
+             & sS_d+(1+r)b=C_d
+        \end{aligned}\right. \]
+    où $C_u$ (resp. $C_d$) est la valeur de l'option à l'instant $n=1$ lorsque $X_1=u$ (resp. $X_1=d$).
+
+    En résolvant ce système on obtient
+    \[\left\lbrace\begin{aligned}
+             & s=\frac{C_d-C_u}{S_d-S_u}              \\
+             & b=\frac{C_uS_d-C_dS_u}{(1+r)(S_d-S_u)}
+        \end{aligned}\right. \]
+    Puisque, par construction, $\Pi$ coïncide quoi qu'il arrive avec $C$ à l'instant 1, il est nécessaire que ce soit aussi le cas à l'instant 0 pour éviter l'apparition de stratégies d'arbitrage. En effet, si on a par exemple
+    \[\Pi_0>C_0 \]
+    alors à l'instant $n=0$ on vend à découvert une part de l'actif $\Pi$ et on se procure une option $C$. On obtient alors le portefeuille
+    \[\mathcal{P}_{\psi}=-\Pi+C \]
+    dont la constitution rapporte quoi qu'il arrive
+    \[\mathcal{P}_{\psi}^{(1)}-\mathcal{P}_{\psi}^{(0)}=\Pi_1-C_1-(-\Pi_0+C_0)=\Pi_0-C_0>0 \]
+    On peut tenir le même type de raisonnement lorsque $\Pi_0<C_0$ et obtient donc que
+
+    \[C_0=\frac{1}{S_d-S_u}\left[S_0+ \frac{C_uS_d-C_dS_u}{S_d-S_u} \right] \]
+\end{ex}
+
+\section{Volatilité}
+Le volatilité est ce qui va traduire l'imprévisibilité du comportement d'un actif et sa définition formelle dépendra du modèle de marché avec lequel on travaille.
+
+Ce pourra être une valeur numérique (modèle de Black \& Scholes), une fonction déterministe (Modèle de Dupire), un processus aléatoire (Modèles à changements de régime ).
+
+Il se peut encore que cette dernière ne soit pas explicitement définie, comme dans le cas du modèle Binomial et qu'elle apparaissent néanmoins de la manière détaillée ci-après.
+
+\begin{ex}
+    On a vu précédemment que le prix d'une option d'achat $C$ de maturité $n=1$ est donné par
+    \[C_0=\frac{1}{S_d-S_u}\left[S_0+ \frac{C_uS_d-C_dS_u}{S_d-S_u} \right] \]
+    et on va maintenant établir le prix d'une telle option lorsque son échéance $n=N\geq 1$.
+\end{ex}
+\chapter{Modèle de Black \& Scholes}
+\section{Présentation}
+\section{Problème inverse}
+\section{Changement de point de vue : L'équation de Dupire}
+\part{Modèles à changement de régime}
+\chapter{Modèle à deux régimes}
+\section{Présentation}
+\section{Problème inverse}
+\chapter{Modèle à $n$ régimes}
+\chapter{Volatilité stochastique}
+
+\part{Le problème de la stabilité pour la volatilité de Dupire}
+
+
+
+\chapter{Unicité et stabilité pour un problème inverse}
+\section{Le problème inverse}
+Soit $\Omega$ un ouvert borné de $\mathbb{R}^n$ et soit $A$ un opérateur non-borné sur $L^2:=L^2(\Omega)$, auto-adjoint et vérifiant
+\begin{enumerate}
+    \item $\forall u\in D(A),\ (Au,u)\leq0$.
+          \item$\forall f\in H,\ \exists ! u\in D(A),\ u-Au=f$.
+\end{enumerate}
+On peut alors montrer le
+\begin{thm}
+    $A$ génère un semi-groupe fortement continu de contraction, noté $S_A$.
+\end{thm}
+\begin{proof}
+    Voir \cite{HB}, \cite{Pazy}.
+\end{proof}
+
+Pour $f\in L^2$, on considère le problème de Cauchy
+\[(\mathcal{C}):\left\lbrace\begin{aligned}
+         & \frac{du}{dt}(t)=A u(t)+\alpha(t)f & \  & t\in[0,T] \\
+         & u(0)=u_0 \in D(A)
+    \end{aligned}\right. \]
+où $\alpha\in\mathcal{C}^1([0,T],L^\infty(\Omega))$ vérifie
+\[\left\lbrace\begin{aligned}
+         & \alpha(t)>0 \text{ sur } \Omega      \\
+         & \alpha'(t)\geq 0 \text{ sur } \Omega
+    \end{aligned}\right. \]
+Sous ces hypothèses, on a la
+\begin{prop}
+    Le problème $\mathcal{C}$ admet une solution unique\footnote{au sens de \cite{Pazy}} donnée par
+    \begin{equation}
+        u(t)=S_A(t)u_0 +\int_{0}^{t}S_A(t-s)[\alpha(s)f]ds
+    \end{equation}
+\end{prop}
+\begin{proof}
+    Voir \cite{Pazy}. Ce résultat reste vrai sans que $S_A$ soit nécessairement de contraction.
+\end{proof}
+
+
+Étant donné $u_T\in D(A)$ et en supposant qu'il existe $f\in H$ vérifiant (\emph{on ne se pose pas la question de l'existence?})
+\[\left\lbrace\begin{aligned}
+         & \frac{du}{dt}(t)=A u(t)+\alpha(t)f & \  & t\in[0,T] \\
+         & u(T)=u_T                                            \\
+         & u(0)=u_0
+    \end{aligned}\right. \]
+on cherche à déterminer si un tel $f$ est \textbf{unique} et s'il dépend continument de $u_T$.
+On se pose donc la question de la stabilité et de l'unicité pour le problème inverse visant à reconstruire $f$.
+
+
+Si $f_1, f_2\in L^2$ et si l'on note $u_i,\ 1\leq i\leq 2$, les solutions respectives des problèmes
+\[(\mathcal{C}_i):\left\lbrace\begin{aligned}
+         & \frac{du}{dt}(t)=A u(t)+\alpha(t)f_i & \  & t\in[0,T_\infty] \\
+         & u(0)=u_0
+    \end{aligned}\right. \]
+alors pour $f:=f_1-f_2$, la fonction $u:=u_1-u_2$ est solution de
+\[(\mathcal{P}):\left\lbrace\begin{aligned}
+         & \frac{du}{dt}(t)=A u(t)+\alpha(t)f & \  & t\in[0,T_\infty] \\
+         & u(0)=0
+    \end{aligned}\right. \]
+On voit alors que l'unicité pour le problème inverse considéré équivaut à la validité de l'implication
+\[u(T)=0\Longrightarrow f=0 \]
+Autrement dit, on se pose la question de l'injectivité de l'application (linéaire) $f\mapsto u(T)$.
+
+De même, la réponse à la question de la stabilité sera donnée par une inégalité du type
+\[||f||\leq C|||u(T)||| \]
+dans des normes bien choisies.
+
+A partir de maintenant et si $f\in L^2$, on notera $u_f$ la solution de $(\mathcal{P})$. On a alors
+\begin{equation}
+    u_f(t)=\int_{0}^{t}S_A(s-t)[\alpha(s)f]ds
+\end{equation}
+
+L'essentiel des arguments pour l'unicité qui vont suivre sont tirés de \cite{BK}.
+\section{Unicité}
+Pour $\varphi\in D(A)$ on a
+\[\begin{aligned}
+        <u_f(T),\varphi> & =<\int_{0}^{T}S_A(T-t)[\alpha(t)f]dt,\varphi>  \\
+                         & = \int_{0}^{T}<S_A(T-t)[\alpha(t)f],\varphi>dt \\
+                         & =\int_{0}^{T}<\alpha(t)f,S_A(T-t)\varphi>dt    \\
+        <u_f(T),\varphi> & =\int_{0}^{T}<\alpha(t)f,w_\varphi(t)>dt
+    \end{aligned} \]
+où $w_\varphi$ est l'unique solution du problème rétrograde
+\[(\mathcal{R}_\varphi):\left\lbrace\begin{aligned}
+         & \frac{dw}{dt}(t)+A w(t)=0 & \  & t\in[0,T] \\
+         & w(T)=\varphi
+    \end{aligned}\right. \]
+On en déduit le
+\begin{lem}
+    Si $u_f(T)=0$ alors
+    \[\forall \varphi \in D(A),\ \int_{0}^{T}<\alpha(t)f,w_\varphi(t)>dt=0 \]
+\end{lem}
+
+On a par ailleurs
+
+\begin{prop}\label{r1}
+    Si $\varphi\in D(A^2)$ alors $-A\varphi\in D(A)$ et
+    \begin{equation}
+        w_{-A\varphi}=\frac{dw_\varphi}{dt}
+    \end{equation}
+    Autrement dit, $\frac{dw_\varphi}{dt}$ est l'unique solution de $(\mathcal{R}_{-A\varphi})$
+\end{prop}
+
+\begin{proof}
+
+    On a d'une part\[\begin{aligned}
+            \frac{d}{dt}\left(\frac{dw_\varphi}{dt}\right) & =\frac{d}{dt}\left(-A w_\varphi\right)          \\
+                                                           & =\frac{d}{dt}\left(-A S_A(T-t)\varphi \right)   \\
+                                                           & =\frac{d}{dt}\left( S_A(T-t)[-A\varphi] \right) \\
+                                                           & =-A  S_A(T-t)[-A\varphi]                        \\
+                                                           & =-A\left(-A S_A(T-t)\varphi\right)              \\
+            \frac{d}{dt}\left(\frac{dw_\varphi}{dt}\right) & =-A\left(\frac{dw_\varphi}{dt} \right)
+        \end{aligned} \]
+    et d'autre part
+    \[\frac{dw_\varphi}{dt}(T)=-A w_\varphi(T) = -A\varphi \]
+\end{proof}
+
+On en déduit le
+\begin{lem}
+    Si $u_f(T)=0$ alors
+    \[\forall \varphi \in D(A^2),\ \int_{0}^{T}<\alpha(t)f,\frac{dw_\varphi(t)}{dt}>dt=0 \]
+\end{lem}
+
+Supposons maintenant $u_f(T)=0$ et soit $\varphi\in D(A^2)$. Une intégration par parties donne
+\[\begin{aligned}
+        0 & =<\alpha(T)f,w_\varphi(T)> - <\alpha(0)f,w_\varphi(0)> - \int_{0}^{T}<\alpha'(t)f,w_\varphi(t)>dt \\
+          & =<\alpha(T)f,\varphi> - <\alpha(0)f,w_\varphi(0)> - \int_{0}^{T}<\alpha'(t)f,w_\varphi(t)>dt
+    \end{aligned} \]
+Il est alors possible d'étendre ce résultat en le
+\begin{thm}\label{thm1}
+    Soit $h\in L^2$. Notons $w_h$ l'unique solution de
+    \[(\mathcal{S}_h):\left\lbrace\begin{aligned}
+             & \frac{dw_h}{dt}(t)+A w_h(t)=0 & \  & t\in[0,T[ \\
+             & w_h(T)=h\in L^2
+        \end{aligned}\right. \]
+    On a alors
+    \[0=<\alpha(T)f,h> - <\alpha(0)f,w_h(0)> - \int_{0}^{T}<\alpha'(t)f,w_h(t)>dt\]
+\end{thm}
+
+\begin{proof}
+    On montre d'abord le
+    \begin{lem}
+        $D(A^2)$ est dense dans $L^2$.
+    \end{lem}
+    \begin{proof}
+        Voir \cite{HB}.
+    \end{proof}
+    Soit alors $h\in L^2$ et soit $(h_{0n})\subset D(A^2)$ une suite convergeant vers $h$. On note $w_n$ l'unique solution de
+    \[(\mathcal{T}_n):\left\lbrace\begin{aligned}
+             & \frac{dw_n}{dt}(t)+A w_n(t)=0 & \  & t\in[0,T[ \\
+             & w_h(T)=h_{0n}
+        \end{aligned}\right. \]
+    Il est facile de voir que l'on a
+    \[||w_n(t)-w_m(t)||\leq ||h_{0n}-h_{0m}|| \]
+    ce dont on déduit que $(w_n)$ converge uniformément vers une fonction $w$.
+    D'autre part on a le
+    \begin{lem}
+        \[\forall t\in [0,T[,\ ||\frac{dw_n}{dt}(t)-\frac{dw_m}{dt}(t)||\leq\frac{1}{T-t} ||h_0n-h_0m|| \]
+    \end{lem}
+    \begin{proof}
+        Voir \cite{HB}.
+    \end{proof}
+    Ainsi, on voit que $(\frac{dw_n}{dt})$ converge uniformément sur tout intervalle $[0,\delta]\subset [0,T[$ et donc, puisque $A$ est fermé, que la limite de $(w_n)$ résout $(\mathcal{S}_h)$. Par unicité, on en déduit que $w=w_h$.
+
+    Enfin la convergence uniforme de $w_n$ vers $w_h$ permet de passer à la limite dans
+    \[0=<\alpha(T)f,h_{0n}> - <\alpha(0)f,w_n(0)> - \int_{0}^{T}<\alpha'(t)f,w_n(t)>dt\]
+    et ainsi obtenir le résultat annoncé.
+
+\end{proof}
+Notons maintenant $f=f_+-f_-$ et supposons $f\neq0$. Alors soit $\Omega_+:=\{f>0\}$ soit $\Omega_-:=\{f<0\}$ n'est pas de mesure nulle. Supposons par exemple que $\Omega_+$ n'est pas de mesure nulle et notons $w$ l'unique solution de
+\[(\mathcal{R}):\left\lbrace\begin{aligned}
+         & \frac{dw}{dt}(t)+A w(t)=0         & \  & t\in[0,T[ \\
+         & w(T)=\mathbf{1}_{\Omega_+}\in L^2
+    \end{aligned}\right. \]
+Le théorème \ref{thm1} permet d'écrire
+\[0=<\alpha(T)f,\mathbf{1}_{\Omega_+}> - <\alpha(0)f,w(0)> - \int_{0}^{T}<\alpha'(t)f,w(t)>dt\]
+D'où
+\[\begin{aligned}
+        0= & <\alpha(T)f,\mathbf{1}_{\Omega_+}> - <\alpha(0)f,w(0)> - \int_{0}^{T}<\alpha'(t)f,w(t)>dt \\
+        =  & <\alpha(T)f_+,1> - <\alpha(0)f_+,w(0)>- \int_{0}^{T}<\alpha'(t)f_+,w(t)>dt                \\ &+<\alpha(0)f_-,w(0)>+\int_{0}^{T}<\alpha'(t)f_-,w(t)>dt\\
+        =  & <\alpha(T)f_+,1> - <\alpha(0)f_+,1> - \int_{0}^{T}<\alpha'(t)f_+,1>                       \\
+           & +<\alpha(0)f_+,1-w(0)> + \int_{0}^{T}<\alpha'(t)f_+,1-w(t)>                               \\
+           & +<\alpha(0)f_-,w(0)>+\int_{0}^{T}<\alpha'(t)f_-,w(t)>dt                                   \\
+        0= & <\alpha(0)f_+,1-w(0)> + \int_{0}^{T}<\alpha'(t)f_+,1-w(t)>                                \\
+           & +<\alpha(0)f_-,w(0)>+\int_{0}^{T}<\alpha'(t)f_-,w(t)>dt                                   \\
+    \end{aligned} \]
+\section{Principe du maximum et unicité dans le cas où $A=\Delta$}
+On rappelle que l'on a fait l'hypothèse $f\neq0$ et que l'on a choisi de traiter le cas où $\Omega_+$ n'est pas de mesure nulle. Le cas où c'est $\Omega_-$ qui n'est pas de mesure nulle se traite de la même manière en choisissant $h=\textbf{1}_{\Omega_-}$ et entraîne la même conclusion.
+
+Lorsque $A=\Delta$ est le Laplacien de Dirichlet on peut montrer que $w$, défini comme ci-avant, vérifie
+\[ 0\leq w(t)\leq 1,\ t\in [0,T] \]
+et
+\[w\in\mathcal{C}^\infty (\overline{\Omega}\times [0,T-\varepsilon])\]
+On en déduit d'abord que
+\[\begin{aligned}
+        0= & <\alpha(0)f_+,1-w(0)> + \int_{0}^{T}<\alpha'(t)f_+,1-w(t)> \\
+           & +<\alpha(0)f_-,w(0)>+\int_{0}^{T}<\alpha'(t)f_-,w(t)>dt    \\
+    \end{aligned} \]
+implique en particulier que
+\[\left\lbrace\begin{aligned}
+         & <\alpha(0)f_-,w(0)>=0                \\
+         & \int_{0}^{T}<\alpha'(t)f_-,w(t)>dt=0
+    \end{aligned}\right. \]
+puisque tous les termes de la somme sont positifs.
+
+Supposons qu'il existe $(x,t)\in\Omega \times [0,T[$ tel que $w(x,t):=w(t)(x)=0$. En adaptant le principe du maximum établi dans \cite{PDEPT} on voit alors que
+\[w=0 \text{ sur }\Omega\times[t,T[ \]
+d'où par continuité de $w$, $\mathbf{1}_{\Omega_+}=w(T)=0$, ce qui est absurde et donc $w(t)>0$.
+
+Si $f\neq 0$ alors
+\[\left(<\alpha(0)f_-,w(0)>=0 \right)\Longrightarrow \alpha(0)=0 \text{ sur } \Omega_- \]
+et donc
+\[\left(\int_{0}^{T}<\alpha'(t)f_-,w(t)>dt=0\right)\Longrightarrow \alpha'(t)=0\text{ sur } \Omega_- \]
+de sorte que finalement $\alpha =0\text{ sur } \Omega_-$, ce qui est absurde si $\Omega_-$ n'est pas de mesure nulle. On en conclut par l'absurde que $f_-=0$.
+
+On a alors en fait
+\[0=<\alpha(0)f_+,1-w(0)> + \int_{0}^{T}<\alpha'(t)f_+,1-w(t)>\]
+soit
+\[\left\lbrace\begin{aligned}
+         & <\alpha(0)f_+,1-w(0)>=0                \\
+         & \int_{0}^{T}<\alpha'(t)f_+,1-w(t)>dt=0
+    \end{aligned}\right. \]
+ce dont on déduit de la même manière que ci-avant que $\alpha=0$ sur $\Omega_+$ et par suite que $f_+=0$.
+
+Ceci entrant en contradiction avec l'hypothèse $f\neq 0$, on en déduit que $f=0$ et on a le résultat attendu
+\[ \left(u_f(T)=0\right)\Longrightarrow f=0\]
+\section{Stabilité}
+On a
+\[\begin{aligned}
+        Au(t) & = A\int_{0}^{t}S_A(t-s)\alpha(s)fds                                                   \\
+              & = \int_{0}^{t}AS_A(t-s)\alpha(s)fds                                                   \\
+              & = - \int_{0}^{t}\frac{d}{ds}[S_A(t-s)\alpha(s)f]ds +\int_{0}^{t}S_A(t-s)\alpha'(s)fds \\
+        Au(t) & = -\alpha(t)f +S_A(t)\alpha(0)f +  \int_{0}^{t}S_A(t-s)\alpha'(s)fds
+    \end{aligned} \]
+donc
+\[\alpha(t)f = -Au(t) + S_A(t)\alpha(0)f +  \int_{0}^{t}S_A(t-s)\alpha'(s)fds\]
+On en déduit l'inégalité
+\[||\alpha(t)f||_2 \leq ||Au(t)||_2 + ||S_A(t)\alpha(0)f +  \int_{0}^{t}S_A(t-s)\alpha'(s)fds||_2\]
+Si on définit la norme du graphe par
+\[||u||_A:= ||u||_2 + ||Au||_2,\ \forall u\in L^2 \]
+alors on a
+\[\begin{aligned}
+        ||\alpha(t)f||_2 & \leq||u(t)||_A + ||S_A(t)\alpha(0)f +  \int_{0}^{t}S_A(t-s)\alpha'(s)fds||_2
+    \end{aligned}\]
+Ainsi, quitte à choisir $M\geq0$ suffisamment grand, on a
+\[\begin{aligned}
+        ||f||_2 & \leq M||u(t)||_A + M||S_A(t)\alpha(0)f +  \int_{0}^{t}S_A(t-s)\alpha'(s)fds||_2
+    \end{aligned}\]
+ou encore
+\begin{equation}\label{Ht}
+    ||f||_2 \leq ||L_tf||_A + ||K_tf||_2
+\end{equation}
+avec
+\[L_tf=\frac{1}{M}u(t) \]
+\[K_tf=\frac{1}{M}\left[S_A(t)\alpha(0)f +  \int_{0}^{t}S_A(t-s)\alpha'(s)fds \right] \]
+
+On peut alors extraire de \eqref{Ht} une inéquation de stabilité, sous réserve que soient vérifiées les hypothèses du
+\begin{lem}
+    Soient $L:U\longrightarrow V$ et $K:U\longrightarrow U$ deux opérateurs sur $U$ vérifiant
+    \begin{equation}\label{H1}
+        \forall f\in U,\ ||f||_U \leq ||Lf||_V + ||Kf||_U
+    \end{equation}
+    Si $L$ est injectif et si $K$ est compact, alors il existe une constante $C\geq0$ telle que
+    \begin{equation}
+        \forall f\in U,\ ||f||_U \leq C||Lf||_V
+    \end{equation}
+\end{lem}
+
+\begin{proof}
+    En raisonnant par l'absurde, on peut construire une suite $(f_n)\subset U$ vérifiant
+    \[||f_n||_U > n||Lf_n||_V  \]
+    pour tout $n\geq0$.
+    Quitte à considérer la suite $(g_n):=\frac{1}{||f_n||}(f_n)$, on peut supposer que $|f||_U=1$ pour $n\geq 0$. On a alors
+    \begin{equation}
+        ||Lf_n||_V<\frac{1}{n}
+    \end{equation}
+    ce dont on déduit que la suite $(Lf_n)$ converge vers $0$ dans $V$.
+
+    Comme d'autre part $K$ est compact et $(f_n)\subset\overline{B(0,1)}$, on peut supposer que $(Kf_n)$ est convergente. On en déduit que $(f_n)$ est de Cauchy puisque d'après \eqref{H1} on a
+    \[||f_n-f_m||_U \leq ||Lf_n-Lf_m||_V + ||Kf_n-Kf_m||_U \]
+
+    En notant $f:=\lim\limits_{n\rightarrow\infty}f_n$, il apparait que $||f||_U=1$ et qu'en particulier, $f\neq 0$. Or on a aussi
+    \[0=\lim\limits_{n\rightarrow\infty}Lf_n=Lf \]
+    ce qui contredit l'injectivité de $L$.
+\end{proof}
+\section{Stabilité dans le cas où $A=\Delta$}
+$f\in L^2$ donc il existe un unique $v\in D(A)=H^1_0\cap H^2$ tel que
+\[f=v-\Delta v \]
+On a alors
+\[\begin{aligned}
+        CK_tf & =S_A(t)\alpha(0)f +  \int_{0}^{t}S_A(t-s)\alpha'(s)fds              \\
+              & =S_A(t)\alpha(0)v -   S_A(t)Av +  \int_{0}^{t}S_A(t-s)\alpha'(s)fds
+    \end{aligned} \]
+Il est clair que $S_A(t)\alpha(0)v$, $\int_{0}^{t}S_A(t-s)\alpha'(s)fds$ sont dans $D(A)$ et comme $S_A(t)v$ est l'unique solution de
+\[\left\lbrace\begin{aligned}
+         & \frac{du}{dt}(t)=A u(t) & \  & t\in[0,T] \\
+         & u(0)=v \in D(A)
+    \end{aligned}\right. \]
+on peut en déduire (voir \cite{HB}, page 114) que $S_A(t)Av=AS_A(t)v$ est lui aussi dans $D(A)$.
+
+On a ainsi
+\[K_t:L^2 \longrightarrow H^1_0\cap H^2 \subset H^1 \subset L^2 \]
+ce dont on déduit que $K_t$ est compact car l'inclusion $ H^1 \subset L^2$ est compacte.
+
+Enfin, l'injectivité de $L_t$ n'étant rien d'autre que la traduction de l'unicité du problème inverse considéré, on obtient
+\[\exists C\geq0,\ ||f||_2\leq C||u_f(t)||_A \]
+en appliquant le lemme de la section précédente.
+\chapter{Tentative d'application au problème de la volatilité de Dupire}
+\chapter{Autre approche}
+\bibliographystyle{plain}
+\bibliography{bibliographie}
 \end{document}
